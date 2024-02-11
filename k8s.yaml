@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gke-origin-deployment
+  labels:
+    app: origin
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: origin
+  template:
+    metadata:
+      labels:
+        app: origin
+    spec:
+      containers:
+      - name: origin
+        image: bandersaeed94/la79y:origin-v2
+        command: ["node", "origin_docker_v3.js"]
+        env:
+        - name: SERVER_PORT
+          value: "10080"
+        - name: SERVER_ID # not used as HOSTNAME will be set which is the pod name
+          value: "1"
+        - name: KAFKA_BROKER_LIST
+          value: "kafka-server:9092"
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "750m"
+          limits:
+            memory: "512Mi"
+            cpu: "750m"
+        ports:
+        - containerPort: 10080
+          protocol: UDP
+        imagePullPolicy: Always
+       
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: origin-service-udp
+spec:
+  type: LoadBalancer
+  selector:
+    app: origin
+  ports:
+  - name: origin-service-10080-10080
+    port: 10080
+    protocol: UDP
+    targetPort: 10080
+

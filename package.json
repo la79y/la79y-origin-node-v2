@@ -1,0 +1,17 @@
+{
+  "name": "lay9y-origin-node-v2",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "echo \"Error: no test specified\" && exit 1",
+    "start": "node origin_docker.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@eyevinn/srt": "file:node-srt",
+    "node-rdkafka": "^2.18.0"
+  }
+}

@@ -1,0 +1,157 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: zookeeper-cluster
+spec:
+  selector:
+    app: zookeeper-cluster
+  ports:
+  - name: client
+    port: 2181
+    targetPort: 2181 
+  clusterIP: None    
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka-server
+spec:
+  selector:
+    app: kafka-server
+  clusterIP: None
+  ports:
+  - port: 9092
+    targetPort: 9092
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka-ui
+spec:
+  type: LoadBalancer
+  selector:
+    app: kafka-ui
+  ports:
+  - port: 10082
+    targetPort: 8080
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: crs-zookeeper
+spec:
+  replicas: 1
+  serviceName: zookeeper-cluster
+  selector:
+    matchLabels:
+      app: zookeeper-cluster
+  template:
+    metadata:
+      labels:
+        component: zookeeper-cluster
+        app: zookeeper-cluster
+    spec:
+      containers:
+      - name: zookeeper
+        image: bitnami/zookeeper:latest
+        securityContext:
+          runAsUser: 0 
+        ports:
+        - containerPort: 2181
+        env:
+        - name: ALLOW_ANONYMOUS_LOGIN
+          value: "yes"
+---
+apiVersion: apps/v1
+kind: StatefulSet
+#kind: Deployment
+metadata:
+  name: crs-kafka
+spec:
+  replicas: 1
+  serviceName:  kafka-server
+  selector:
+    matchLabels:
+        app: kafka-server
+  template:
+    metadata:
+      labels:
+        app: kafka-server
+    spec:
+      hostname: kafka
+      containers:
+      - name: kafka
+        # image: bitnami/kafka:2.6.0  
+        image: bitnami/kafka:latest
+        securityContext:
+          runAsUser: 0
+        resources:
+          requests:
+            memory: "1G"
+            cpu: "1"             
+        ports:
+         - containerPort: 9092
+        env:
+        - name: KAFKA_CFG_ZOOKEEPER_CONNECT
+          # value: crs-zookeeper-0.zookeeper-cluster.default.svc.cluster.local:2181,crs-zookeeper-1.zookeeper-cluster.default.svc.cluster.local:2181,crs-zookeeper-2.zookeeper-cluster.default.svc.cluster.local:2181
+          value: zookeeper-cluster:2181
+        - name: ALLOW_PLAINTEXT_LISTENER
+          value: "yes" 
+        - name: KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP
+          value: "CLIENT:PLAINTEXT"
+        - name: KAFKA_CFG_LISTENERS
+          value: "CLIENT://kafka-server:9092"
+        - name: KAFKA_CFG_ADVERTISED_LISTENERS
+          value: "CLIENT://kafka-server:9092"
+        - name: KAFKA_CFG_INTER_BROKER_LISTENER_NAME
+          value: "CLIENT"
+        - name: KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR
+          value: "1"
+        - name: KAFKA_ENABLE_KRAFT
+          value: "no"
+        volumeMounts:
+          - name: kafka-data
+            mountPath: /bitnami/kafka
+  volumeClaimTemplates:
+  - metadata:
+      name: kafka-data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 100Gi
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kafka-ui
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+        app: kafka-ui
+  template:
+    metadata:
+      labels:
+        app: kafka-ui
+    spec:
+      hostname: kafka-ui
+      containers:
+      - name: kafka-ui
+        image: provectuslabs/kafka-ui
+        securityContext:
+          runAsUser: 0
+        resources:
+          requests:
+            memory: "1G"
+            cpu: "1"             
+        ports:
+         - containerPort: 8080
+        env:
+        - name: DYNAMIC_CONFIG_ENABLED
+          value: "true"
+        - name: KAFKA_CLUSTERS_0_NAME
+          value: "CLIENT" 
+        - name: KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS
+          value: "kafka-server:9092"

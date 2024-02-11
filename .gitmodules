@@ -1,0 +1,3 @@
+[submodule "node-srt"]
+	path = node-srt
+	url = https://github.com/bander-saeed94/node-srt
