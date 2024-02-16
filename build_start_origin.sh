@@ -5,14 +5,16 @@ unset -v port
 unset -v brokers
 unset -v origin
 unset -v tag
+unset -v srt_passphrase
 
-while getopts i:p:b:f:t: opt; do
+while getopts i:p:b:f:t:s: opt; do
         case $opt in
                 i) id=$OPTARG ;;
                 p) port=$OPTARG ;;
                 b) brokers=$OPTARG ;;
                 f) origin=$OPTARG ;;
                 t) tag=$OPTARG ;;
+                s) srt_passphrase=$OPTARG ;;
                 *)
                         echo 'Error in command line parsing' >&2
                         exit 1
@@ -33,5 +35,6 @@ time DOCKER_BUILDKIT=1 docker build . -t $tag && \
  -e SERVER_PORT=$port \
  -e SERVER_ID=$id \
  -e KAFKA_BROKER_LIST=$brokers \
+ -e SRT_PASSPHRASE=$srt_passphrase \
  -p $port:$port/udp \
  $tag node $origin
