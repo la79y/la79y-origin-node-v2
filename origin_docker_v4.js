@@ -51,9 +51,10 @@ async function onClientConnected(connection) {
       {
         "metadata.broker.list": `${process.env.KAFKA_BROKER_LIST}`,
         "client.id": `origin-${process.env.HOSTNAME != null && process.env.HOSTNAME != undefined ? process.env.HOSTNAME : process.env.SERVER_ID}-${connection.fd}-${Date.now()}`,
+        "acks": "0", // Set acks to 0 for no acknowledgments
         // "compression.codec": "lz4",
         // "compression.type": "lz4",
-        // "linger.ms": 10,
+        // "linger.ms": 10, default to zero
         // "batch.size": 1000000,
       },
       {},
@@ -62,6 +63,20 @@ async function onClientConnected(connection) {
         objectMode: false,
       },
   );
+  stream.on('error', (err) => {
+    console.error('Kafka Producer Stream Error:', err);
+    stream.destroy();
+    stream.producer.disconnect();
+    connection.close();
+  });
+  // Connection error handling
+  connection.on('error', (err) => {
+    console.error(`Connection Error for FD ${connection.fd}:`, err);
+    stream.destroy();
+    stream.producer.disconnect();
+    connection.close();
+  });
+
 
   const readableStream = new Stream.Readable();
   readableStream._read = function () {};
@@ -79,6 +94,7 @@ async function onClientConnected(connection) {
     console.log(`closed ${connection.fd}`);
     stream.destroy();
     stream.producer.disconnect();
+    connection.close();
     const index = fds.findIndex((fd) => fd.fd == connection.fd);
     if (index > -1) {
       fds.splice(index, 1);
