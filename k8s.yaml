@@ -4,7 +4,7 @@ metadata:
   name: gke-origin-deployment
   labels:
     app: origin
-  namespace: origin
+  namespace: origin-namespace
 spec:
   replicas: 3
   selector:
@@ -46,7 +46,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: origin-service-udp
-  namespace: origin
+  namespace: origin-namespace
 spec:
   type: LoadBalancer
   selector:
