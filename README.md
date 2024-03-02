@@ -41,3 +41,9 @@ gcloud container clusters get-credentials lahthi-cluster --region me-central1 --
 kubectl apply -f 00-namespace.yaml
 kubectl apply -f k8s.yaml
 ```
+
+
+## Stream
+```shell
+srt://34.18.27.156:10080?streamid=#!::r=livestream4,m=publish,t=stream&transtype=live&mode=caller&latency=1000&passphrase=theonlypassphrase&pbkeylen=16
+```
