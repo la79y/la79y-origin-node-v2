@@ -31,3 +31,13 @@ srt://127.0.0.1:1234?streamid=#!::r=livestream3,m=publish,t=stream&transtype=liv
 ```shell
 srt://127.0.0.1:1234?streamid=#!::r=livestream3,m=publish,t=stream&transtype=live&mode=caller&latency=3200000&passphrase=theonlypassphrase&pbkeylen=16
 ```
+
+
+## Deploy on K8S
+```shell
+gcloud container clusters get-credentials lahthi-cluster --region me-central1 --project final-project-413218
+```
+```shell
+kubectl apply -f 00-namespace.yaml
+kubectl apply -f k8s.yaml
+```
