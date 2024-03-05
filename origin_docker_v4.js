@@ -132,3 +132,16 @@ async function onClientConnected(connection) {
 // }
 
 // startServer();
+
+const net = require('net');
+
+const HEALTH_CHECK_PORT = process.env.HEALTH_CHECK_PORT || 9999; // Choose an appropriate port
+
+const healthCheckServer = net.createServer((socket) => {
+  console.log("Received health check request");
+  socket.end('OK\n'); // Respond with OK and close the connection
+});
+
+healthCheckServer.listen(HEALTH_CHECK_PORT, () => {
+  console.log(`Health check server listening on port ${HEALTH_CHECK_PORT}`);
+});

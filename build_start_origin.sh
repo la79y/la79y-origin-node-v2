@@ -6,8 +6,9 @@ unset -v brokers
 unset -v origin
 unset -v tag
 unset -v srt_passphrase
+unset -v health_port
 
-while getopts i:p:b:f:t:s: opt; do
+while getopts i:p:b:f:t:s:h: opt; do
         case $opt in
                 i) id=$OPTARG ;;
                 p) port=$OPTARG ;;
@@ -15,6 +16,7 @@ while getopts i:p:b:f:t:s: opt; do
                 f) origin=$OPTARG ;;
                 t) tag=$OPTARG ;;
                 s) srt_passphrase=$OPTARG ;;
+                h) health_port=$OPTARG ;;
                 *)
                         echo 'Error in command line parsing' >&2
                         exit 1
@@ -33,8 +35,10 @@ time DOCKER_BUILDKIT=1 docker build . -t $tag && \
  docker run -it \
  --network app-tier \
  -e SERVER_PORT=$port \
+ -e HEALTH_CHECK_PORT=$health_port \
  -e SERVER_ID=$id \
  -e KAFKA_BROKER_LIST=$brokers \
  -e SRT_PASSPHRASE=$srt_passphrase \
  -p $port:$port/udp \
+  -p $health_port:$health_port/tcp \
  $tag node $origin

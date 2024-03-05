@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: origin
-        image: bandersaeed94/la79y:origin-v3
+        image: bandersaeed94/la79y:origin-v5
         command: ["node", "origin_docker_v4.js"]
         env:
         - name: SERVER_PORT
@@ -28,6 +28,8 @@ spec:
           value: "kafka-0.kafka-headless.kafka.svc.cluster.local:9092,kafka-1.kafka-headless.kafka.svc.cluster.local:9092,kafka-2.kafka-headless.kafka.svc.cluster.local:9092"
         - name: SRT_PASSPHRASE # todo remove
           value: "theonlypassphrase"
+        - name: HEALTH_CHECK_PORT
+          value: "9999"
         resources:
           requests:
             memory: "512Mi"
@@ -38,6 +40,8 @@ spec:
         ports:
         - containerPort: 10080
           protocol: UDP
+        - containerPort: 9999
+          protocol: TCP
         imagePullPolicy: Always
        
 
@@ -47,6 +51,13 @@ kind: Service
 metadata:
   name: origin-service-udp
   namespace: origin-namespace
+  annotations:
+    service.beta.kubernetes.io/do-loadbalancer-healthcheck-protocol: "tcp"
+    service.beta.kubernetes.io/do-loadbalancer-healthcheck-port: "9999"
+    service.beta.kubernetes.io/do-loadbalancer-healthcheck-check-interval-seconds: "3"
+    service.beta.kubernetes.io/do-loadbalancer-healthcheck-response-timeout-seconds: "5"
+    service.beta.kubernetes.io/do-loadbalancer-healthcheck-unhealthy-threshold: "3"
+    service.beta.kubernetes.io/do-loadbalancer-healthcheck-healthy-threshold: "5"
 spec:
   type: LoadBalancer
   selector:
@@ -56,4 +67,8 @@ spec:
     port: 10080
     protocol: UDP
     targetPort: 10080
+  - name: health-origin-service-9999-9999
+    port: 9999
+    protocol: TCP
+    targetPort: 9999
 

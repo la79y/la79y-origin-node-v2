@@ -15,11 +15,11 @@ has been customized to do some fixes:
   ```sh
   ./build_start_origin.sh -s theonlypassphrase -i 1 -p 1234 -b kafka-server:9092 -f origin_docker_v4.js -t nodejs-origin-rdkafka-v4
   ```
-er  ```sh
+```sh
   ./build_start_origin.sh -s theonlypassphrase -i 1 -p 1234 -b kafka-1:9092 -f origin_docker_v4.js -t nodejs-origin-rdkafka-v4
   ```
   ```sh
-  ./build_start_origin.sh -s theonlypassphrase -i 1 -p 1234 -b kafka-1:9092,kafka-2:9092,kafka-3:9092 -f origin_docker_v4.js -t nodejs-origin-rdkafka-v4
+  ./build_start_origin.sh -s theonlypassphrase -i 1 -p 1234 -h 9999 -b kafka-1:9092,kafka-2:9092,kafka-3:9092 -f origin_docker_v4.js -t nodejs-origin-rdkafka-v4
   ```
 
 ## To stream to origin
@@ -37,13 +37,23 @@ srt://127.0.0.1:1234?streamid=#!::r=livestream3,m=publish,t=stream&transtype=liv
 ```shell
 gcloud container clusters get-credentials lahthi-cluster --region me-central1 --project final-project-413218
 ```
+
+
 ```shell
 kubectl apply -f 00-namespace.yaml
 kubectl apply -f k8s.yaml
+
+#check service has external ip
+kubectl get service -n origin-namespace
+kubectl describe service origin-service-udp -n origin-namespace
 ```
 
 
 ## Stream
 ```shell
 srt://34.18.27.156:10080?streamid=#!::r=livestream4,m=publish,t=stream&transtype=live&mode=caller&latency=1000&passphrase=theonlypassphrase&pbkeylen=16
+```
+digital ocean
+```shell
+srt://209.38.176.82:10080?streamid=#!::r=livestream4,m=publish,t=stream&transtype=live&mode=caller&latency=1000&passphrase=theonlypassphrase&pbkeylen=16
 ```
