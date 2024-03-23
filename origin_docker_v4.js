@@ -3,12 +3,7 @@ const { SRT, SRTServer, AsyncSRT, SRTReadStream, SRTSockOpt } = require("@eyevin
 const Kafka = require("node-rdkafka");
 const Transform = require("stream").Transform;
 const Stream = require("stream");
-// const dbClient = require('./db_client').dbClient;
-// const getConfig = require('./db_client').getConfig();
-// await dbClient.connect();
-// const passphrase =  await getConfig(dbClient,'passphrase')
-// console.log(`passphrase :${passphrase}`)
-// dbClient.close();
+const {fetchConfigByKey} = require('./getConfigByKey')
 
 let fds = [];
 
@@ -122,8 +117,24 @@ async function onClientConnected(connection) {
 
   asyncSrtServer.create().then(async (s) => {
     // Set encryption options here
-    const passphrase = process.env.SRT_PASSPHRASE; // Ensure you have this environment variable set
-    // const keyLength = 16; // 128 bits. You can also use 24 for 192 bits or 32 for 256 bits
+    let passphrase = process.env.SRT_PASSPHRASE; // Ensure you have this environment variable set
+    let keyLength = 16; // 128 bits. You can also use 24 for 192 bits or 32 for 256 bits
+    try{
+      const result =  await fetchConfigByKey('origin_passphrase')
+      if(result.length > 0 && result[0].value){
+        passphrase = result[0].value;
+      }
+    } catch (err){
+      console.error(`failed fetching config will default to env passphrase`, err)
+    }
+    try{
+      const result =  await fetchConfigByKey('origin_keyLength')
+      if(result.length > 0 && result[0].value){
+        keyLength = Number(result[0].value);
+      }
+    } catch (err){
+      console.error(`failed fetching config will default to hardcoded keylength`, err)
+    }
     // // Check if passphrase is set, then enable encryption
     if (passphrase && passphrase.length > 0) {
       await s.setSocketFlags([SRT.SRTO_PASSPHRASE,SRT.SRTO_PBKEYLEN], [passphrase,keyLength]);

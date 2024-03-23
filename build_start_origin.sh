@@ -39,6 +39,11 @@ time DOCKER_BUILDKIT=1 docker build . -t $tag && \
  -e SERVER_ID=$id \
  -e KAFKA_BROKER_LIST=$brokers \
  -e SRT_PASSPHRASE=$srt_passphrase \
+ -e DB_USER=admin \
+ -e DB_HOST=la79y-postgres \
+ -e DB_DATABASE=la79y \
+ -e DB_PASSWORD='1234' \
+ -e DB_PORT=5432 \
  -p $port:$port/udp \
   -p $health_port:$health_port/tcp \
  $tag node $origin
