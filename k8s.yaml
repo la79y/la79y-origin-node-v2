@@ -30,6 +30,16 @@ spec:
           value: "theonlypassphrase"
         - name: HEALTH_CHECK_PORT
           value: "9999"
+        - name: DB_USER
+          value: "admin"
+        - name: DB_HOST
+          value: "la79y-postgres"
+        - name: DB_DATABASE
+          value: "la79y"
+        - name: DB_PASSWORD
+          value: "1234"
+        - name: DB_PORT
+          value: '5432'
         resources:
           requests:
             memory: "512Mi"
