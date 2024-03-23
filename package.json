@@ -12,6 +12,7 @@
   "license": "ISC",
   "dependencies": {
     "@eyevinn/srt": "file:node-srt",
-    "node-rdkafka": "^2.18.0"
+    "node-rdkafka": "^2.18.0",
+    "pg": "^8.11.3"
   }
 }

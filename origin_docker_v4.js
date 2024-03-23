@@ -3,6 +3,12 @@ const { SRT, SRTServer, AsyncSRT, SRTReadStream, SRTSockOpt } = require("@eyevin
 const Kafka = require("node-rdkafka");
 const Transform = require("stream").Transform;
 const Stream = require("stream");
+// const dbClient = require('./db_client').dbClient;
+// const getConfig = require('./db_client').getConfig();
+// await dbClient.connect();
+// const passphrase =  await getConfig(dbClient,'passphrase')
+// console.log(`passphrase :${passphrase}`)
+// dbClient.close();
 
 let fds = [];
 
@@ -116,10 +122,9 @@ async function onClientConnected(connection) {
 
   asyncSrtServer.create().then(async (s) => {
     // Set encryption options here
-    console.log(process.env.SRT_PASSPHRASE)
     const passphrase = process.env.SRT_PASSPHRASE; // Ensure you have this environment variable set
-    const keyLength = 16; // 128 bits. You can also use 24 for 192 bits or 32 for 256 bits
-    // Check if passphrase is set, then enable encryption
+    // const keyLength = 16; // 128 bits. You can also use 24 for 192 bits or 32 for 256 bits
+    // // Check if passphrase is set, then enable encryption
     if (passphrase && passphrase.length > 0) {
       await s.setSocketFlags([SRT.SRTO_PASSPHRASE,SRT.SRTO_PBKEYLEN], [passphrase,keyLength]);
     }
