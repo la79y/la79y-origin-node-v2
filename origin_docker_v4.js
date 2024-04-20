@@ -3,7 +3,7 @@ const { SRT, SRTServer, AsyncSRT, SRTReadStream, SRTSockOpt } = require("@eyevin
 const Kafka = require("node-rdkafka");
 const Transform = require("stream").Transform;
 const Stream = require("stream");
-const {fetchConfigByKey} = require('./getConfigByKey')
+const {fetchConfigByKey, fetchSessionIdByResourceAndUser, updateSessionToUsed} = require('./getConfigByKey')
 
 let fds = [];
 
@@ -44,9 +44,24 @@ async function onClientConnected(connection) {
   let streamId = await asyncSrt.getSockOpt(fd.fd, SRT.SRTO_STREAMID);
   console.log(`streamId ${streamId}`);
 
+  let username = streamId.substring(streamId.indexOf("u="));
+  username = username.substring(2, username.indexOf(","));
+  console.log(`username=${username}`)
+
+  let sessionId = streamId.substring(streamId.indexOf("s="));
+  sessionId = sessionId.substring(2, sessionId.indexOf(","));
+  console.log(`sessionId=${sessionId}`)
+
   let requestedResource = streamId.substring(streamId.indexOf("r="));
   requestedResource = requestedResource.substring(2, requestedResource.indexOf(","));
   console.log(`requestedResource ${requestedResource}`);
+  let rows = await  fetchSessionIdByResourceAndUser(sessionId,username,requestedResource,false);
+  console.log(`row: ${JSON.stringify(rows)}`);
+  if(rows.length < 1){
+    await connection.close();//todo close with some error so client wont reconnect, or do connection error
+  } else {
+    updateSessionToUsed(sessionId,username,requestedResource)
+  }
 
   const stream = Kafka.Producer.createWriteStream(
       {
