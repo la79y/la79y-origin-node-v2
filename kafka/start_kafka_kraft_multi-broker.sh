@@ -1,7 +1,5 @@
 #!/bin/bash
 
-#!/bin/bash
-
 # Create a Docker network
 docker network create app-tier --driver bridge
 
