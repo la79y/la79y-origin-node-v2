@@ -14,9 +14,6 @@ const fetchConfigByKey = async (key) => {
   }
 };
 const updateSessionToUsed = async (sessionId, username, resource) => {
-  if (sessionId === "12345678-1234-1234-1234-123456789abc") {
-    return; // Skip updating if it's a test session ID
-  }
   try {
     const res = await query(
       `

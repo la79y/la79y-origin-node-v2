@@ -3,7 +3,10 @@ const { SRT, SRTServer, AsyncSRT, SRTReadStream, SRTSockOpt } = require("@eyevin
 const Kafka = require("node-rdkafka");
 const Transform = require("stream").Transform;
 const Stream = require("stream");
-const {fetchConfigByKey, fetchSessionIdByResourceAndUser, updateSessionToUsed} = require('./getConfigByKey')
+const {fetchConfigByKey, fetchSessionIdByResourceAndUser, updateSessionToUsed} = require('./getConfigByKey');
+
+let enable_test_session = await fetchConfigByKey('enable_test_session_id');
+let test_session = await fetchConfigByKey('test_session_id');
 
 let fds = [];
 
@@ -55,12 +58,19 @@ async function onClientConnected(connection) {
   let requestedResource = streamId.substring(streamId.indexOf("r="));
   requestedResource = requestedResource.substring(2, requestedResource.indexOf(","));
   console.log(`requestedResource ${requestedResource}`);
-  let rows = await  fetchSessionIdByResourceAndUser(sessionId,username,requestedResource,false);
-  console.log(`row: ${JSON.stringify(rows)}`);
-  if(rows.length < 1){
-    await connection.close();//todo close with some error so client wont reconnect, or do connection error
-  } else {
-    updateSessionToUsed(sessionId,username,requestedResource)
+
+  if(enable_test_session.length == 1 &&  enable_test_session[0].value == 'true'
+  && test_session.length == 1 && test_session[0].value == sessionId){
+    //do nothing
+  }
+  else{
+    let rows = await  fetchSessionIdByResourceAndUser(sessionId,username,requestedResource,false);
+    console.log(`row: ${JSON.stringify(rows)}`);
+    if(rows.length < 1){
+      await connection.close();//todo close with some error so client wont reconnect, or do connection error
+    } else {
+      updateSessionToUsed(sessionId,username,requestedResource)
+    }
   }
 
   const stream = Kafka.Producer.createWriteStream(
