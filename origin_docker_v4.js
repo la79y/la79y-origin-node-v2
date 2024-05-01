@@ -5,9 +5,6 @@ const Transform = require("stream").Transform;
 const Stream = require("stream");
 const {fetchConfigByKey, fetchSessionIdByResourceAndUser, updateSessionToUsed} = require('./getConfigByKey');
 
-let enable_test_session = await fetchConfigByKey('enable_test_session_id');
-let test_session = await fetchConfigByKey('test_session_id');
-
 let fds = [];
 
 const srtListenTransform = new Transform({
@@ -59,6 +56,8 @@ async function onClientConnected(connection) {
   requestedResource = requestedResource.substring(2, requestedResource.indexOf(","));
   console.log(`requestedResource ${requestedResource}`);
 
+  let enable_test_session = await fetchConfigByKey('enable_test_session_id');
+  let test_session = await fetchConfigByKey('test_session_id');
   if(enable_test_session.length == 1 &&  enable_test_session[0].value == 'true'
   && test_session.length == 1 && test_session[0].value == sessionId){
     //do nothing
