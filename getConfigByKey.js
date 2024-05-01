@@ -22,6 +22,7 @@ const updateSessionToUsed = async (sessionId, username, resource) => {
             where id = '${sessionId}'
               and username = '${username}'
               and resource = '${resource}'
+              and is_streamer = true
               and used = false;`,
       []
     );
@@ -45,6 +46,7 @@ const fetchSessionIdByResourceAndUser = async (
             where id = '${sessionId}'
               and username = '${username}'
               and resource = '${resource}'
+              and is_streamer = true
               and used = ${used}`,
       []
     );
