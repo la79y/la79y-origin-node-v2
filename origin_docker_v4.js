@@ -3,7 +3,7 @@ const {SRT, SRTServer, AsyncSRT, SRTReadStream, SRTSockOpt} = require("@eyevinn/
 const Kafka = require("node-rdkafka");
 const Transform = require("stream").Transform;
 const Stream = require("stream");
-const {fetchConfigByKey, fetchSessionIdByResourceAndUser, updateSessionToUsed} = require('./getConfigByKey');
+const {fetchConfigByKey, fetchSessionIdByResourceAndUser, updateSessionToUsed, updateStreamingStatus} = require('./getConfigByKey');
 
 let fds = [];
 
@@ -68,6 +68,7 @@ async function onClientConnected(connection) {
             updateSessionToUsed(sessionId, username, requestedResource)
         }
     }
+    updateStreamingStatus(requestedResource, true);
 
     const stream = Kafka.Producer.createWriteStream(
         {
@@ -90,6 +91,7 @@ async function onClientConnected(connection) {
         stream.destroy();
         stream.producer.disconnect();
         connection.close();
+        updateStreamingStatus(requestedResource, false);
     });
     // Connection error handling
     connection.on('error', (err) => {
@@ -97,6 +99,7 @@ async function onClientConnected(connection) {
         stream.destroy();
         stream.producer.disconnect();
         connection.close();
+        updateStreamingStatus(requestedResource, false);
     });
 
 
@@ -122,6 +125,7 @@ async function onClientConnected(connection) {
         if (index > -1) {
             fds.splice(index, 1);
         }
+        updateStreamingStatus(requestedResource, false);
     });
 
     async function onClientData() {
