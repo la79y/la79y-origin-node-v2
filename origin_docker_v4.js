@@ -195,9 +195,29 @@ const HEALTH_CHECK_PORT = process.env.HEALTH_CHECK_PORT || 9999; // Choose an ap
 
 const healthCheckServer = net.createServer((socket) => {
     console.log("Received health check request");
-    socket.end('OK\n'); // Respond with OK and close the connection
+    // Handle any errors that occur within this socket connection
+    socket.on('error', (error) => {
+        console.error('Socket error:', error);
+    });
+    socket.end('OK\n');
 });
 
+// Listen for errors related to the server itself (e.g., port in use)
+healthCheckServer.on('error', (error) => {
+    console.error('Server error:', error);
+});
+
+// Start the server on the designated port
 healthCheckServer.listen(HEALTH_CHECK_PORT, () => {
     console.log(`Health check server listening on port ${HEALTH_CHECK_PORT}`);
+});
+
+// Global handler for uncaught exceptions
+process.on('uncaughtException', (error) => {
+    console.error('Uncaught Exception:', error);
+});
+
+// Global handler for unhandled promise rejections
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('Unhandled Rejection at:', promise, 'reason:', reason);
 });
