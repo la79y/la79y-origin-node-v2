@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: origin
-        image: bandersaeed94/la79y:origin-v5
+        image: bandersaeed94/la79y:origin-v6
         command: ["node", "origin_docker_v4.js"]
         env:
         - name: SERVER_PORT
