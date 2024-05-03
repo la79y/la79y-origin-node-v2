@@ -114,6 +114,7 @@ async function onClientConnected(connection) {
 
     connection.on("closing", async () => {
         // handle connection closing
+        updateStreamingStatus(requestedResource, false);
     });
 
     connection.on("closed", async () => {
